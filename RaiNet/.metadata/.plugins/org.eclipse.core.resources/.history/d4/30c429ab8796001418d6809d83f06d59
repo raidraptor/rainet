@@ -1,0 +1,89 @@
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Point;
+
+import javax.swing.ImageIcon;
+
+/**
+ * Stores the data on all Link Cards and Virus Cards.
+ * 
+ * @author Marvin Li and James Bai
+ * @version January 4th, 2015
+ */
+public class CardPiece extends Card implements Movable {
+	public final static Image LINK_IMAGE = new ImageIcon("images\\link.jpg")
+			.getImage();
+	public final static Image Virus_IMAGE = new ImageIcon("images\\virus.jpg")
+			.getImage();
+	public final static Image BACK_IMAGE = new ImageIcon("images\\rn.jpg")
+			.getImage();
+
+	private boolean isVirus;
+//	boolean lineBoost; // Deal with this later.
+	boolean isFaceUp;
+
+	/**
+	 * Creates a new cardPiece object.
+	 * 
+	 * @param position
+	 *            the position of the cardPiece object.
+	 * @param isVirus
+	 *            true if this cardPiece is a virus, false if it is a link.
+	 * @param owner
+	 *            the player who is in possession of the cardPiece.
+	 */
+	public CardPiece(Point position, boolean isVirus, int owner) {
+		super(owner, position);
+		this.isVirus = isVirus;
+		isFaceUp = false;
+	}
+
+	/**Checks if a certain move is valid.
+	 * 
+	 * @param otherTile the destination tile.
+	 * @return true if the move is valid, false otherwise.
+	 */
+	public boolean canMoveTo(Tile otherTile) {
+		// TODO Auto-generated method stub
+		// if (otherTile.hasPiece())
+		// if (otherTile.piece.owner==this.owner)
+		// return false;
+		return true;
+	}
+	
+	/**Removes this cardPiece from the tile.
+	 * 
+	 */
+	public CardPiece captured() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	/**Draws the cardPiece object.
+	 * 
+	 * @param g
+	 */
+	public void draw(Graphics g) {
+		if (isFaceUp) {
+			if (isVirus)
+				g.drawImage(Virus_IMAGE, position.x, position.y, null);
+			else
+				g.drawImage(LINK_IMAGE, position.x, position.y, null);
+			// draw it face up.
+		} else
+			g.drawImage(BACK_IMAGE, position.x, position.y, null);
+		// TODO Auto-generated method stub
+
+	}
+
+	/**Adds the cardPiece to the tile
+	 * 
+	 * @param otherTile the destination tile.
+	 */
+	public void moveTo(Tile otherTile) {
+		// Dont forget to animate.
+		// Also dont forget to capture pieces.
+		// Also, pieces with line boost may not jump.
+		otherTile.addPiece(this);
+	}
+}

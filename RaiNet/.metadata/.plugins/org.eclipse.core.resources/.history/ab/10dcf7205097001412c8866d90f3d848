@@ -1,0 +1,460 @@
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import javax.swing.JPanel;
+
+/**A class to keep track of the board of the game
+ * @author James Bai Marvin Li
+ * @version December 25th, 2014
+ */
+public class Board extends JPanel implements MouseListener, MouseMotionListener
+{
+	// Constants for the overall layout.
+	public static final int WIDTH = 640;
+	public static final int HEIGHT = 640;
+	private static final Color TABLE_COLOUR = new Color(140, 225, 140); // Image please!
+	private final int ANIMATION_FRAMES = 6; // May need to change this number.
+	
+	// Constants for layout of the board.
+	private final int NO_OF_ROWS = 8;
+	private final int NO_OF_COLUMNS = 8;
+	private final int STACK_AREA_CAPACITY = 8;
+	private final int BOARD_X = 30; // May also need to change this number.
+	private final int BOARD_Y = 150; // As well as this one.
+	private final int STACK_AREA_X = 30; // Change
+	private final int PLAYER_1_STACK_AREA_Y = 30; // These as
+	private final int PLAYER_2_STACK_AREA_Y = 425; // Well!
+	private final int STACK_AREA_SPACING = 95; // :)
+	
+	// Variables for the Rai Net Game
+	private RaiNetMain parentFrame;
+	private Tile	[][] board;
+	private Tile[] player1StackArea;
+	private Tile[] player2StackArea;
+	private int player1VirusCards;
+	private int player1LinkCards;
+	private int player2VirusCards;
+	private int player2LinkCards;	
+	private Hand player1Hand;
+	private Hand player2Hand;
+	private Tile selectedTile;
+	private Card selectedCard;
+	private int playerTurn;
+	private CardPiece movingPiece;
+	private Point lastPoint;
+	private boolean setUp;
+	private int mode; // 0 is neither, 1 is move, 2 is peek.
+	private boolean animate = false; // Dont forget to switch this to 'true' later
+	
+	/**Constructs the Board, the player's Hands, and puts in the listeners.
+	 * 
+	 * @param parentFrame the main Frame that holds this panel.
+	 */
+	public Board(RaiNetMain parentFrame)
+	{
+		// Set up the size and background colour
+		setPreferredSize(new Dimension(WIDTH, HEIGHT));
+		this.setBackground(TABLE_COLOUR);
+		this.parentFrame = parentFrame; // We'll experiment with the consequences of removing this later to find out what this does.
+		
+		// Add mouse listeners to the Board
+		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
+		
+		// Sets up the Board.
+		board = new Tile[NO_OF_ROWS][NO_OF_COLUMNS];
+		// Does the Board
+		int yPos = 0;
+		for(int row = 0; row < NO_OF_ROWS; row++)
+		{
+			int xPos = 0;	
+			for(int col=0 ; col<NO_OF_COLUMNS ; col++)
+			{
+				board[row][col] = new Tile(xPos, yPos);
+				xPos += Tile.TILE_WIDTH;
+			}
+			yPos += Tile.TILE_HEIGHT;
+		}
+		
+		// Then the Stack Areas
+		
+		// For Player 1.
+		player1StackArea = new Tile[STACK_AREA_CAPACITY];
+		yPos = PLAYER_1_STACK_AREA_Y;
+		int xPos = STACK_AREA_X;
+		for(int col = 0; col < STACK_AREA_CAPACITY; col++)
+			// -2 is used to indicate the Stack Area is 'above' the board.
+			player1StackArea[col] = new Tile(xPos, yPos);
+		
+		// For Player 2
+		player2StackArea = new Tile[STACK_AREA_CAPACITY];
+		yPos = PLAYER_2_STACK_AREA_Y;
+		xPos = STACK_AREA_X;
+		for(int col = 0; col < STACK_AREA_CAPACITY; col++)
+			// 9 is used to indicate the Stack Area is 'below' the board.
+			player1StackArea[col] = new Tile(xPos, yPos);
+		
+		// The Hands.
+		// Add code.
+		// Do we need Tiles? how will spacing work? Will they we centered?
+		
+		// We might need a menu screen.
+		
+		repaint();
+	}
+	
+	/**
+	 * Checks to see if the player has won by having 4 Link Cards in their Stack Area or 4 Virus Cards in their opponent's Stack Area.
+	 * @return 0 if noone has won; 1 if player 1 has won; 2 if player 2 has won.
+	 */
+	private int checkForWinner()
+	{
+		if (player1LinkCards == 4 || player2VirusCards == 4)
+			return 1;
+		if (player2LinkCards == 4 || player1VirusCards == 4)
+			return 2;
+		
+		// No player has won yet.
+		return 0;
+	}
+	
+	/**Delays the given number of milliseconds
+	 * 
+	 * @param milliSec number of milliseconds to delay
+	 */
+	private void delay(int milliSec)
+	{
+		try
+		{
+			Thread.sleep(milliSec);
+		}
+		catch (Exception e)
+		{
+		}
+	}
+	
+	/**
+	 * Handles the mouse moved events to show which Cards may be selected.
+	 * @param event event information for mouse moved
+	 */
+	public void mouseMoved(MouseEvent event)
+	{
+		// Set the cursor to the hand if we are on a card that we can pick up
+		Point currentPoint = event.getPoint();
+		
+		if (setUp)
+		{
+			// Searches through the board.
+						for (Tile[] nextRow: board)
+							for (Tile nextTile: nextRow)
+								if(nextTile.hasPiece()&&nextTile.tile.get(0).contains(currentPoint))			// Make it work for same column?
+									selectedCard = nextTile.tile.get(0);
+		}
+		
+		// Hovering over a mode.
+		//if // Insert code here.
+
+		// If a Terminal Card has already been selected.
+		// Add code here.
+		// We need to figure how to deal with the firewall and other terminal cards.
+		
+//		// If the mouse is hovering over a square that the selected piece can move to.
+//		if (selectedPiece != null && selectedPiece instanceof CardPiece)
+//		{
+//			// Searches through the board.
+//			for (Tile[] nextRow: board)
+//				for (Tile nextTile: nextRow)
+//					if (((Movable)selectedPiece).canMoveTo(nextTile))
+//						{
+//							setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+//							return; 
+//						}
+//		}
+		// Searches through the Terminal Cards in the player's hands.
+		if (playerTurn == 1)
+			for (Card nextCard: player1Hand.hand)
+			{
+				if (nextCard.contains(currentPoint))
+				{
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					return; 
+				}
+			}
+		else if (playerTurn == 2)
+			for (Card nextCard: player2Hand.hand)
+			{
+				if (nextCard.contains(currentPoint))
+				{
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					return;
+				}
+			}
+
+		// The mouse is hovering over a Card.
+		for (Tile[] nextRow: board)
+			for (Tile nextTile: nextRow)
+				if (nextTile.hasPiece() && nextTile.contains(currentPoint))
+				{
+					setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+					return;
+				}
+		
+		// Otherwise we just use the default cursor.
+		setCursor(Cursor.getDefaultCursor());
+	}
+	
+	/**
+	 * Handles the mouse pressed events to select a card.
+	 * @param event event information for mouse pressed
+	 */
+	public void mousePressed(MouseEvent event)
+	{
+		if (setUp)
+		{
+			//select selected card.
+		}
+		//else
+		
+		// Add code so that the selected card has a marker or something on it.
+		// Similar to what happens in dn when you click a card.
+		Point selectedPoint = event.getPoint();
+		
+//		// A mode is selected.
+//		// if // Insert code here.
+		if (selectedCard == null) {
+			for (Tile[] nextRow : board)
+				for (Tile nextTile : nextRow) {
+					if (nextTile.contains(selectedPoint) && nextTile.hasPiece()) {
+						selectedCard = nextTile.removePiece();
+
+						lastPoint = selectedPoint;
+						repaint();
+						break;
+					}
+				}
+		}
+		
+		// If a Terminal Card has already been selected.
+		// Add code here.
+		// We need to figure how to deal with the firewall and other terminal cards.
+		
+		// If a destination has been selected.
+//	
+//		if (!selectedTile.tile.isEmpty() && selectedTile.tile.get(0) instanceof CardPiece)
+//		{		
+//			// Searches through the board.
+//			for (Tile[] nextRow: board)
+//				for (Tile nextTile: nextRow)
+//				{if(nextTile.contains(selectedPoint))
+//					if (((Movable)selectedTile.tile.get(0)).canMoveTo(nextTile))
+//						{
+//							nextTile.addPiece(selectedTile.tile.get(0));
+//							
+//							selectedTile.tile.remove(0);
+//							((Movable)selectedTile.tile.get(0)).moveTo(nextTile);
+//							// In the case the destination to leave the board via the Server Port.
+//							// Deal with the tile leaving the board here.
+//							return;
+//						}
+//				}
+	//	}
+//		// Searches through the Terminal Cards in the player's hands.
+//		if (playerTurn == 1)
+//			for (Card nextCard: player1Hand.hand)
+//			{
+//				if (nextCard.contains(selectedPoint))
+//				{
+//					// Selects Terminal Card.
+//					selectedPiece = nextCard;
+//					return;
+//				}
+//			}
+//		else if (playerTurn == 2)
+//			for (Card nextCard: player2Hand.hand)
+//			{
+//				if (nextCard.contains(selectedPoint))
+//				{
+//					// Selects Terminal Card.
+//					selectedPiece = nextCard;
+//					return;
+//				}
+//			}
+		
+		// Searches through the CardPiece objects to see if anything was selected.
+		for (Tile[] nextRow: board)
+			for (Tile nextTile: nextRow)
+				if (nextTile.hasPiece() && nextTile.contains(selectedPoint))
+				{
+					//selectedTile.tile.remove(0);
+					selectedCard=nextTile.removePiece();
+					return;
+				}
+		// Add in code so that the selected card is highlighted like in dn.
+		repaint();
+	}	
+	
+	/**Moves a Piece during the animation
+	 * @param PieceToMove the CardPiece that you want to move
+	 * @param fromPos the original position of the Piece
+	 * @param toPos the destination position of the piece
+	 */
+	public void moveAPiece(final CardPiece PieceToMove, Point fromPos, Point toPos)
+	{
+		int dx = (toPos.x - fromPos.x) / ANIMATION_FRAMES; // We might want to refractor this variable.
+		int dy = (toPos.y - fromPos.y) / ANIMATION_FRAMES; // As well as this one.
+
+		for (int times = 1; times <= ANIMATION_FRAMES; times++) // And this one.
+		{
+			fromPos.x += dx;
+			fromPos.y += dy;
+			PieceToMove.setPosition(fromPos);
+
+			// Update the drawing area.
+			paintImmediately(0, 0, getWidth(), getHeight());
+			delay(30); // Maybe change the number in here.
+
+		}
+		PieceToMove.setPosition(toPos);
+		repaint();
+	}
+	
+	/**
+	 * Makes a new card by resetting the board and the hands.
+	 */
+	public void newGame()
+	{
+		// Resets the Board.
+		for (Tile[] nextRow: board)
+			for (Tile nextTile: nextRow)
+		if (nextTile.hasPiece())
+			nextTile.removePiece();
+		board[0][1].addPiece(new CardPiece (new Point(80, 80), false, 1));
+		board[0][2].addPiece(new CardPiece (new Point(0, 0), false, 1));
+		// Resets the hands.
+		// We need to add in the code for this after we finish the TerminalCards Class along with the cards themselves.
+		setUp = true;
+		repaint();
+	}
+	
+	/**Draws out the pieces, the cards, and the animations.
+	 * @param g the Graphics context to do the drawing
+	 */
+	public void paintComponent(Graphics g)
+	{
+		super.paintComponent(g);
+
+		// Draws out the pieces.
+		for (Tile[] nextRow: board)
+			for (Tile nextTile: nextRow)
+					nextTile.draw(g);
+
+		// Draws out the player's hands.
+		//for (Card nextCard: player1Hand.hand)
+		//	nextCard.draw(g);
+		//for (Card nextCard: player2Hand.hand)
+			//nextCard.draw(g);
+		
+		// For animation to draw the pieces moving.
+//		if (movingPiece != null)
+//			movingPiece.draw(g);
+//		repaint();
+	}
+	
+	@Override
+	public void mouseDragged(MouseEvent event) {
+		
+		Point currentPoint = event.getPoint();
+		
+		if (setUp)
+		{
+			//move card.
+	//		 Searches through the board.
+			for (Tile[] nextRow: board)
+				for (Tile nextTile: nextRow)
+					if(nextTile.hasPiece()&&nextTile.tile.contains(currentPoint))			// Make it work for same column?
+					{
+						System.out.print("working");
+						((CardPiece)selectedCard).swap(nextTile);
+
+						// Swap selected card with card on tile if overlapping.
+//						Card tempCard = nextTile.tile.remove(0);
+//						nextTile.tile.add(selectedCard);
+//						selectedCard = tempCard;
+					}
+
+			// Dont forget to deal with if the player brings their mouse out of the window.
+		}
+		//else
+	
+		//Everything may be handled by clicking; lemme know if you think otherwise.
+		// otherwise, delete this when you see it.
+		//Point currentPoint = event.getPoint();
+		
+		if (selectedCard!=null)
+		{
+			selectedCard.move(lastPoint,currentPoint);
+			lastPoint = currentPoint;
+			repaint();
+		}
+		
+	}
+	
+	@Override
+	public void mouseClicked(MouseEvent arg0)
+	{
+		
+		// Do the set up button here.
+//		setUp = false;
+		
+	}
+	@Override
+	public void mouseEntered(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseExited(MouseEvent arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void mouseReleased(MouseEvent event) {
+		
+		Point currentPoint = event.getPoint();
+		
+		if (setUp)
+		{
+			// Searches through the board.
+			for (Tile[] nextRow: board)
+				for (Tile nextTile: nextRow)
+					if(nextTile.hasPiece()&&nextTile.tile.get(0).contains(currentPoint))			// Make it work for same column?
+					{
+						nextTile.tile.add(selectedCard);
+						selectedCard = null;
+					}
+		}
+		//else
+		
+		// TODO Auto-generated method stub
+
+		if (selectedCard != null) {
+			for (Tile[] nextRow: board)
+				for (Tile nextTile: nextRow)
+				{
+					if(nextTile.contains(currentPoint)) 
+					{
+						nextTile.addPiece(selectedCard);
+						selectedCard=null;
+					}
+				}
+			
+		}
+		repaint();
+	}
+	
+}

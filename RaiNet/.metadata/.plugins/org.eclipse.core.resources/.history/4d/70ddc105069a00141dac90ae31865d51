@@ -1,0 +1,47 @@
+import java.awt.Graphics;
+import java.awt.Point;
+
+//Also need intro comments here.
+public interface Movable
+{
+	// Also need intro comments infront of every one of these methods.
+	
+	/**Draws the object.
+	 * 
+	 * @param g
+	 */
+	public void draw(Graphics g);
+	
+	/**Determines if the selected point is within the object.
+	 * 
+	 * @param selectedPoint the selected point
+	 * @return true if the selected point is within the object.
+	 * 		   false otherwise.
+	 */
+	public boolean contains(Point point);
+	
+	/**Checks if a certain move is valid.
+	 * 
+	 * @param otherTile the destination tile.
+	 * @return true if the move is valid, false otherwise.
+	 */
+	public boolean canMoveTo(Tile otherTile);
+	
+	/**Adds the object to the tile
+	 * 
+	 * @param otherTile the destination tile.
+	 */
+	public void moveTo(Tile otherTile);
+	
+	/**Moves the piece
+	 * 
+	 * @param initialPos The original position of the object.
+	 * @param finalPos The final position of the object.
+	 */
+	public void move(Point initialPos, Point finalPos);
+	
+	/**Removes this object from the tile.
+	 * 
+	 */
+	public CardPiece captured();
+}

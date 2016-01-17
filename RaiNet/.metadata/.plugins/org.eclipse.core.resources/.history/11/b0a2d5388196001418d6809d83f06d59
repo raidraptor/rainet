@@ -1,0 +1,99 @@
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+/**
+ * Main Frame for a the Rai Net Game.
+ * Sets up the menus and places the Board in the Frame
+ * 
+ * @author Marvin Li and James Bai
+ * @version December 25th 2014
+ */
+public class RaiNetMain extends JFrame implements ActionListener
+{
+	private BoardT board;
+	private JMenuItem newMenuItem, quitMenuItem, aboutMenuItem;
+
+	/** 
+	 * Creates a RaiNetMain from object
+	 */
+	public RaiNetMain()
+	{
+		super("Rai Net"); // Check spacing on this; I dont know where this goes.
+		setResizable(false);
+
+		// Add in an Icon.
+		setIconImage(new ImageIcon("notAnImage.png").getImage()); // We need to find an icon; maybe an hourglass or a pocket watch?
+
+		// Add in a Simple Menu
+		JMenuBar menuBar = new JMenuBar();
+		JMenu gameMenu = new JMenu("Game");
+		gameMenu.setMnemonic('G');
+		newMenuItem = new JMenuItem("New Game");
+		newMenuItem.addActionListener(this);
+
+		quitMenuItem = new JMenuItem("Exit");
+		quitMenuItem.addActionListener(this);
+
+		gameMenu.add(newMenuItem);
+		gameMenu.addSeparator();
+		gameMenu.add(quitMenuItem);
+		menuBar.add(gameMenu);
+
+		JMenu helpMenu = new JMenu("Help");
+		helpMenu.setMnemonic('H');
+		aboutMenuItem = new JMenuItem("About...");
+		aboutMenuItem.addActionListener(this);
+		helpMenu.add(aboutMenuItem);
+		menuBar.add(helpMenu);
+		setJMenuBar(menuBar);
+
+		// Set up the layout and add in the Board
+		setLayout(new BorderLayout());
+		board = new BoardT(this); // Constructor not working?
+		add(board, BorderLayout.CENTER);
+
+		// (Try to) Centre the frame in the middle of the screen
+		Dimension screen = Toolkit.getDefaultToolkit().getScreenSize();
+		this.setVisible(true);
+		setLocation((screen.width - BoardT.WIDTH) / 2 - this.getWidth(),
+				(screen.height - BoardT.HEIGHT) / 2 - this.getHeight());
+	}
+
+	/**
+	 * Method that deals with the menu options
+	 * 
+	 * @param event the event that triggered this method
+	 */
+	public void actionPerformed(ActionEvent event)
+	{
+		if (event.getSource() == newMenuItem)
+		{
+			board.newGame();
+		}
+		else if (event.getSource() == quitMenuItem)
+		{
+			System.exit(0);
+		}
+		else if (event.getSource() == aboutMenuItem)
+		{
+			JOptionPane.showMessageDialog(board,
+					"Rai Net by:\n Marvin Li and James Bai\n\u00a9 2014\n\nIdea from Rai-Net Access Battlers\nSteins; Gate",
+					"About Rai Net", JOptionPane.INFORMATION_MESSAGE);
+		}
+	}
+
+	public static void main(String[] args)
+	{
+		RaiNetMain frame = new RaiNetMain();
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.pack();
+		frame.setVisible(true);
+	}
+}
